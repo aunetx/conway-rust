@@ -51,7 +51,11 @@ impl Shader for RenderShader {
     }
 
     unsafe fn get_uniform_location(&self, name: &str) -> GLint {
-        gl::GetUniformLocation(self.program, c_str_from(name).as_ptr())
+        let loc = gl::GetUniformLocation(self.program, c_str_from(name).as_ptr());
+        if loc == -1 {
+            println!("uniform {} could not be found", name);
+        }
+        loc
     }
 }
 

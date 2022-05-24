@@ -57,11 +57,6 @@ bool should_live(ivec2 pix_coord, bool alive, uint neighbours_nb) {
     return alive;
 }
 
-// pause the game if the left button is clicked, or
-bool is_paused() {
-    return mouse_pressed;
-}
-
 float rand(vec2 co) {
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -70,7 +65,7 @@ bool is_placing_pixels(ivec2 pix_coord) {
     // the distance from the mouse to the pixel
     float dist_mouse = distance(mouse_position.xy, vec2(pix_coord) / size.x);
 
-    return dist_mouse < mouse_radius / size.x && is_paused() && rand(fract(pix_coord * time)) > 0.95;
+    return dist_mouse < mouse_radius / size.x && mouse_pressed && rand(fract(pix_coord * time)) > 0.95;
 }
 
 void main() {
@@ -83,7 +78,7 @@ void main() {
     uint neighbours_nb = count_neighbours(pixel_coord);
 
     // update next state if not paused
-    if (!is_paused()) {
+    if (!mouse_pressed) {
         alive = should_live(pixel_coord, alive, neighbours_nb);
     }
 
@@ -96,9 +91,7 @@ void main() {
         px.r = 0;
     }
 
-    if (time > 2.5) {
-        px.rgb = vec3(1.);
-    }
+    px.x = distance(mouse_position, vec2(pixel_coord) / size.x) / 10.;
 
     imageStore(next_generation, pixel_coord, px);
 }

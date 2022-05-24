@@ -86,10 +86,9 @@ fn main() {
 
             compute_shader.set_float("mouse_radius", 5.);
             compute_shader.set_float("time", state.time);
-            compute_shader.set_vec2(
+            compute_shader.set_vector2(
                 "mouse_position",
-                state.mouse_position.0 as f32,
-                state.mouse_position.1 as f32,
+                &[state.mouse_position.0 as f32, state.mouse_position.1 as f32],
             );
             compute_shader.set_bool("mouse_pressed", state.mouse_state);
 

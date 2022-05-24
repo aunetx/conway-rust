@@ -1,12 +1,5 @@
 use gl::types::*;
-use std::{
-    ffi::{CStr, CString},
-    fs::File,
-    io::Read,
-    mem,
-    os::raw::c_void,
-    ptr, str,
-};
+use std::{ffi::CString, fs::File, io::Read, mem, os::raw::c_void, ptr, str};
 
 pub mod compute;
 pub mod render;
@@ -174,6 +167,6 @@ unsafe fn create_program(shaders: &[GLuint]) -> GLuint {
     shader_program
 }
 
-fn c_str_from(name: &str) -> &CStr {
-    unsafe { CStr::from_bytes_with_nul_unchecked(name.as_bytes()) }
+fn c_str_from(name: &str) -> CString {
+    CString::new(name).unwrap()
 }
