@@ -16,6 +16,8 @@ pub trait Shader {
 
     unsafe fn use_program(&self);
 
+    unsafe fn run_program(&self);
+
     unsafe fn get_uniform_location(&self, name: &str) -> GLint;
 
     unsafe fn set_bool(&self, name: &str, value: bool) {
@@ -44,6 +46,32 @@ pub trait Shader {
 
     unsafe fn set_vector4(&self, name: &str, value: &Vec<f32>) {
         gl::Uniform4fv(self.get_uniform_location(name), 1, value.as_ptr());
+    }
+
+    unsafe fn bind_image(
+        &self,
+        image: GLuint,
+        unit: GLuint,
+        access_flag: GLenum,
+        format_flag: GLenum,
+    ) {
+        gl::BindImageTexture(unit, image, 0, gl::FALSE, 0, access_flag, format_flag);
+    }
+
+    unsafe fn bind_texture(&self, texture: GLuint, unit: GLuint) {
+        gl::ActiveTexture(gl::TEXTURE0 + unit);
+        gl::BindTexture(gl::TEXTURE_2D, texture);
+    }
+
+    unsafe fn bind_texture_uniform(&self, name: &str, unit: GLint) {
+        // use the program to be able to set the uniform value
+        self.use_program();
+
+        // set the uniform
+        self.set_int(name, unit);
+
+        // unload the program
+        gl::UseProgram(0);
     }
 }
 

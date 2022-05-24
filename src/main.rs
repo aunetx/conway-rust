@@ -3,10 +3,12 @@ extern crate glfw;
 
 use glfw::Context;
 
-mod shaders;
+mod shader;
+mod texture;
 mod utils;
 
-use shaders::{compute::*, render::*, Shader};
+use shader::{compute::*, render::*, Shader};
+use texture::*;
 use utils::*;
 
 fn main() {
@@ -40,7 +42,18 @@ fn main() {
     load_screen_quad();
 
     // Create the compute shader
-    let compute_shader = ComputeShader::new(&["shader/conway_shader.glsl"]);
+    let mut compute_shader = ComputeShader::new(&["shader/conway_shader.glsl"]);
+
+    // Create an load textures
+    let current_generation = new_texture(ImageSource::Path("texture/first_generation.png"), gl::R8);
+    //let next_generation = new_texture(ImageSource::Empty(1024, 1024), gl::R8);
+
+    // bind texture to currect spot, needed only once
+    unsafe {
+        render_shader.bind_texture_uniform("current_generation", 0);
+    }
+
+    println!("Beginning main loop!");
 
     // Loop until the user closes the window
     while !window.should_close() {
@@ -50,11 +63,17 @@ fn main() {
         // compute pass
         unsafe {
             compute_shader.use_program();
+            compute_shader.compute_group = (1024 / 8, 1024 / 8, 1);
+            compute_shader.bind_image(current_generation, 0, gl::READ_WRITE, gl::R8);
+            //compute_shader.bind_image(next_generation, 1, gl::READ_WRITE, gl::R8);
+            compute_shader.run_program();
         }
 
         // render pass
         unsafe {
             render_shader.use_program();
+            render_shader.bind_texture(current_generation, 0);
+            render_shader.run_program();
         }
 
         // swap buffers and poll events

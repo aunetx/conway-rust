@@ -1,12 +1,14 @@
 use super::*;
 
+#[derive(Default)]
 pub struct ComputeShader {
     pub program: u32,
+    pub compute_group: (u32, u32, u32),
 }
 
 impl Shader for ComputeShader {
     fn new(paths: &[&'static str]) -> Self {
-        let mut shader = Self { program: 0 };
+        let mut shader = Self::default();
 
         let mut shader_sources: Vec<CString> = Vec::new();
 
@@ -36,21 +38,22 @@ impl Shader for ComputeShader {
         shader
     }
 
-    unsafe fn get_uniform_location(&self, name: &str) -> GLint {
-        gl::GetUniformLocation(self.program, c_str_from(name).as_ptr())
-    }
-
     unsafe fn use_program(&self) {
-        gl::ClearColor(0., 0., 0., 1.);
-        gl::Clear(gl::COLOR_BUFFER_BIT);
-
         // activate the shader
         gl::UseProgram(self.program);
+    }
 
-        // update shader uniform
-        self.set_vec4("color", 0.3, 0.5, 0.1, 1.0);
+    unsafe fn run_program(&self) {
+        let c = self.compute_group;
 
-        // render the geometry
-        gl::DrawArrays(gl::TRIANGLES, 0, 3);
+        // dispach the computation
+        gl::DispatchCompute(c.0, c.1, c.2);
+
+        // pause CPU execution until the images are closed
+        gl::MemoryBarrier(gl::SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    }
+
+    unsafe fn get_uniform_location(&self, name: &str) -> GLint {
+        gl::GetUniformLocation(self.program, c_str_from(name).as_ptr())
     }
 }
