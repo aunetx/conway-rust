@@ -1,13 +1,12 @@
 extern crate gl;
 extern crate glfw;
 
-use gl::types::*;
 use glfw::Context;
 
 mod shaders;
 mod utils;
 
-use shaders::{render::*, Shader};
+use shaders::{compute::*, render::*, Shader};
 use utils::*;
 
 fn main() {
@@ -33,22 +32,25 @@ fn main() {
     // Load OpenGL
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    // Load render shader and geometry
+    // Create the render shader
     let render_shader =
-        RenderShader::new(&["shader/vertex_shader.glsl", "shader/vertex_shader.glsl"]);
-    let screen_quad: GLuint;
-    unsafe {
-        // load the shader used to render to screen
+        RenderShader::new(&["shader/vertex_shader.glsl", "shader/fragment_shader.glsl"]);
 
-        // create the screen geometry and bind it
-        screen_quad = create_screen_quad();
-        gl::BindVertexArray(screen_quad);
-    }
+    // Load the screen geometry
+    load_screen_quad();
+
+    // Create the compute shader
+    let compute_shader = ComputeShader::new(&["shader/conway_shader.glsl"]);
 
     // Loop until the user closes the window
     while !window.should_close() {
         // events
         process_events(&mut window, &events);
+
+        // compute pass
+        unsafe {
+            compute_shader.use_program();
+        }
 
         // render pass
         unsafe {
