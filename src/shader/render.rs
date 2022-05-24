@@ -47,7 +47,7 @@ impl Shader for RenderShader {
 
     unsafe fn run_program(&self) {
         // render the geometry
-        gl::DrawArrays(gl::TRIANGLES, 0, 3);
+        gl::DrawArrays(gl::TRIANGLES, 0, 6);
     }
 
     unsafe fn get_uniform_location(&self, name: &str) -> GLint {
@@ -56,44 +56,43 @@ impl Shader for RenderShader {
 }
 
 /// Create and load directly a screen quad, used as a geometry to render to screen
-pub fn load_screen_quad() {
+pub unsafe fn load_screen_quad() -> GLuint {
     // set up vertex data (and buffer(s)) and configure vertex attributes
-    let vertices: [f32; 9] = [
-        -0.5, -0.5, 0.0, // left
-        0.5, -0.5, 0.0, // right
-        0.0, 0.5, 0.0, // top
+    let vertices: [f32; 24] = [
+        -1., -1., 0., 0., 1., -1., 1., 0., 1., 1., 1., 1., //
+        -1., -1., 0., 0., 1., 1., 1., 1., -1., 1., 0., 1., //
     ];
 
     let (mut vbo, mut vao) = (0, 0);
 
-    unsafe {
-        gl::GenVertexArrays(1, &mut vao);
-        gl::GenBuffers(1, &mut vbo);
+    gl::GenVertexArrays(1, &mut vao);
+    gl::GenBuffers(1, &mut vbo);
 
-        // bind the Vertex Array Object
-        gl::BindVertexArray(vao);
+    // bind the Vertex Array Object
+    gl::BindVertexArray(vao);
 
-        // bind and set vertex buffer
-        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-        gl::BufferData(
-            gl::ARRAY_BUFFER,
-            (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-            &vertices[0] as *const f32 as *const c_void,
-            gl::STATIC_DRAW,
-        );
+    // bind and set vertex buffer
+    gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+        &vertices[0] as *const f32 as *const c_void,
+        gl::STATIC_DRAW,
+    );
 
-        // configure vertex attributes
-        gl::VertexAttribPointer(
-            0,
-            3,
-            gl::FLOAT,
-            gl::FALSE,
-            3 * mem::size_of::<GLfloat>() as GLsizei,
-            ptr::null(),
-        );
-        gl::EnableVertexAttribArray(0);
+    // configure vertex attributes
+    gl::VertexAttribPointer(
+        0,
+        2,
+        gl::FLOAT,
+        gl::FALSE,
+        4 * mem::size_of::<GLfloat>() as GLsizei,
+        ptr::null(),
+    );
+    gl::EnableVertexAttribArray(0);
 
-        // unbind the vertex buffer
-        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-    }
+    // unbind the vertex buffer
+    gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+
+    vao
 }

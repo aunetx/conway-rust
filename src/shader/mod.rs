@@ -32,19 +32,27 @@ pub trait Shader {
         gl::Uniform1f(self.get_uniform_location(name), value);
     }
 
-    unsafe fn set_vector3(&self, name: &str, value: &Vec<f32>) {
-        gl::Uniform3fv(self.get_uniform_location(name), 1, value.as_ptr());
+    unsafe fn set_vec2(&self, name: &str, x: f32, y: f32) {
+        gl::Uniform2f(self.get_uniform_location(name), x, y);
+    }
+
+    unsafe fn set_vector2(&self, name: &str, value: &[f32]) {
+        gl::Uniform2fv(self.get_uniform_location(name), 1, value.as_ptr());
     }
 
     unsafe fn set_vec3(&self, name: &str, x: f32, y: f32, z: f32) {
         gl::Uniform3f(self.get_uniform_location(name), x, y, z);
     }
 
+    unsafe fn set_vector3(&self, name: &str, value: &[f32]) {
+        gl::Uniform3fv(self.get_uniform_location(name), 1, value.as_ptr());
+    }
+
     unsafe fn set_vec4(&self, name: &str, x: f32, y: f32, z: f32, w: f32) {
         gl::Uniform4f(self.get_uniform_location(name), x, y, z, w);
     }
 
-    unsafe fn set_vector4(&self, name: &str, value: &Vec<f32>) {
+    unsafe fn set_vector4(&self, name: &str, value: &[f32]) {
         gl::Uniform4fv(self.get_uniform_location(name), 1, value.as_ptr());
     }
 
